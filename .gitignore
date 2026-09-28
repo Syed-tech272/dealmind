@@ -1,0 +1,6 @@
+backend/.venv/
+backend/.env
+backend/dealmind.db
+__pycache__/
+*.pyc
+.DS_Store
