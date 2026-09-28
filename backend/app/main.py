@@ -15,14 +15,14 @@ db.init()
 
 
 @app.get("/health")
-def health():
+async def health():
     return {
         "ok": True,
         "groq_model": llm.MODEL,
         "groq_key": bool(llm.GROQ_KEY),
         "hindsight_bank": memory.BANK,
         "hindsight_url": memory.BASE,
-        "memory_ok": memory.health(),
+        "memory_ok": await memory.ahealth(),
     }
 
 
@@ -40,35 +40,35 @@ def deal(did: str):
 
 
 @app.post("/deals/{did}/log")
-def log(did: str, body: LogBody):
+async def log(did: str, body: LogBody):
     d = db.get_deal(did)
     if not d:
         raise HTTPException(404, "deal not found")
-    return agent.log_call(d, body.notes)
+    return await agent.log_call(d, body.notes)
 
 
 @app.get("/deals/{did}/brief")
-def brief(did: str):
+async def brief(did: str):
     d = db.get_deal(did)
     if not d:
         raise HTTPException(404, "deal not found")
-    return agent.brief(d)
+    return await agent.brief(d)
 
 
 @app.post("/deals/{did}/followup")
-def followup(did: str, body: FollowupBody):
+async def followup(did: str, body: FollowupBody):
     d = db.get_deal(did)
     if not d:
         raise HTTPException(404, "deal not found")
-    return agent.draft_followup(d, body.intent)
+    return await agent.draft_followup(d, body.intent)
 
 
 @app.get("/deals/{did}/memory")
-def mem(did: str):
+async def mem(did: str):
     d = db.get_deal(did)
     if not d:
         raise HTTPException(404, "deal not found")
-    return {"memories": agent.memory_view(d)}
+    return {"memories": await agent.memory_view(d)}
 
 
 @app.post("/deals/{did}/outcome")
@@ -78,8 +78,8 @@ def outcome(did: str, body: OutcomeBody):
 
 
 @app.get("/patterns")
-def patterns(objection: str = "too expensive"):
-    return {"objection": objection, "matches": agent.win_patterns(objection)}
+async def patterns(objection: str = "too expensive"):
+    return {"objection": objection, "matches": await agent.win_patterns(objection)}
 
 
 # ---- static UI (single page, no build step) ----
